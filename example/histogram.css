@@ -1,0 +1,7 @@
+g.bin text {
+  opacity: 0; 
+  color: black;
+}
+g.bin:hover text {
+  opacity: 1;
+}

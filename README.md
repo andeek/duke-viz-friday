@@ -3,4 +3,4 @@
 ### Duke Visualization Friday Forum
 ### April 5, 2019
 
-Slides: http://andeekaplan.com/presentations/viz-friday
+Slides: http://andeekaplan.com/duke-viz-friday

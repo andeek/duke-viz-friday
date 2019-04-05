@@ -2,7 +2,7 @@
 title: "A Cornucopia of Interactive Graphics with Shiny and D3"
 subtitle: "Duke Visualization Friday Forum"
 author: "Andee Kaplan"
-date: "April 5, 2019 <br/> http://bit.ly/viz-friday"
+date: "April 5, 2019 <br/> http://bit.ly/duke-viz-friday"
 output:
   xaringan::moon_reader:
     lib_dir: libs

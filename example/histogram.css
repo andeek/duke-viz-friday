@@ -1,6 +1,7 @@
 g.bin text {
   opacity: 0; 
   color: black;
+  font: 10px sans-serif;
 }
 g.bin:hover text {
   opacity: 1;

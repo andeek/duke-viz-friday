@@ -57,9 +57,19 @@ function wrapper(el, data) {  // this is the function that will run in the clien
     var dat = data.data;
     
     var n = dat.length, // number of points
-        bins = d3.histogram().domain(x.domain()).thresholds(data.n_bins)(dat), // bin based on the number of bins in r
-        bin_count = [];
+        bin_count = []; // storage for bin count
     
+    // make bins manually
+    var tempScale = d3.scaleLinear().domain([0, data.n_bins]).range([0, 1]);
+    var manual_bins = d3.range(data.n_bins + 1).map(tempScale);
+    
+    
+    // make binned data
+    var bins = d3.histogram()
+      .domain(x.domain())
+      .thresholds(manual_bins)
+      (dat); // bin based on the number of bins in r
+      
     // get a count of each bin for creation of y axis
     bins.forEach(function(x) { bin_count.push(x.length); });
     
@@ -91,14 +101,15 @@ function wrapper(el, data) {  // this is the function that will run in the clien
     group.append("rect")
           .attr("x", function(d) { return x(d.x0) + 1; })
           .attr("y", function(d) { return y(d.length); })
-          .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
+          .attr("width", function(d) { return d3.max([0, x(d.x1) - x(d.x0) - 1]); })
           .attr("height", function(d) { return y(0) - y(d.length); });
     
     // add text that appears on hover    
     group.append("text")
           .attr("fill", "black")
-          .attr("x", function(d) { return x(d.x0) + 1; })
-          .attr("y", function(d) { return y(d.length) + 10; })
+          .attr("text-anchor", "middle")
+          .attr("x", function(d) { return x(d.x0) + (x(d.x1) - x(d.x0))/2; })
+          .attr("y", function(d) { return y(d.length) - 5; })
           .text(function(d) { return d.length; });
         
     // Exit any old bins.

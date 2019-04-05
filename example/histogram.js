@@ -1,30 +1,43 @@
+/*
+This is a simple histogram script
+The data comes from an R Shiny application
+Input data is a list with two elements:
+data - actual data values, generated from a beta distribution
+n_bins - the (approximate) number of bins in the histogram, selected by the user
+*/
+
+// binding to get data from shiny & r
 var outputBinding = new Shiny.OutputBinding();
 $.extend(outputBinding, {
   find: function(scope) {
-    return $(scope).find('.d3graph');
+    return $(scope).find('.d3graph'); // find the linked elements
   },
   renderValue: function(el, data) {  
-    wrapper(el, data);
+    wrapper(el, data); // render the results of this function
   }});
-Shiny.outputBindings.register(outputBinding);
+Shiny.outputBindings.register(outputBinding); // register the binding
 
-function wrapper(el, data) {  
+function wrapper(el, data) {  // this is the function that will run in the client
   
+  // create the svg to house the plot
   d3.select(el).select("svg").remove();
   var svg = d3.select(el)
     .append("svg")
     .attr("width", 700)
     .attr("height", 300);
   
+  // variables for later
   var width = +svg.attr("width"),
     height = +svg.attr("height"),
     margin = {top: 20, right: 30, bottom: 30, left: 40},
     bin, g, group;
   
+  // x axis scale, this data only goes from 0 to 1
   var x = d3.scaleLinear()
       .domain([0, 1])
       .range([margin.left, width - margin.right]);
-
+  
+  // add x axis
   svg.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + (height - margin.bottom) + ")")
@@ -36,40 +49,52 @@ function wrapper(el, data) {
       .attr("text-anchor", "end")
       .attr("font-weight", "bold")
       .text("Randomly generated data.");
-      
-  var y = d3.scaleLinear()
-      .domain([0, 130])
-      .range([height - margin.bottom, margin.top]);
-
-  svg.append("g")
-      .attr("class", "axis axis--y")
-      .attr("transform", "translate(" + margin.left + ",0)")
-      .call(d3.axisLeft(y));
   
-  
+  // when the data comes in, plot it.
   if(data) {
     
+    // pull out the actual data from r
     var dat = data.data;
     
-    var n = dat.length,
-        bins = d3.histogram().domain(x.domain()).thresholds(data.n_bins)(dat);
-
+    var n = dat.length, // number of points
+        bins = d3.histogram().domain(x.domain()).thresholds(data.n_bins)(dat), // bin based on the number of bins in r
+        bin_count = [];
+    
+    // get a count of each bin for creation of y axis
+    bins.forEach(function(x) { bin_count.push(x.length); });
+    
+    // y axis scale
+    var y = d3.scaleLinear()
+      .domain([0, d3.max(bin_count) + 5])
+      .range([height - margin.bottom, margin.top]);
+  
+    // add y axis  
+    svg.append("g")
+        .attr("class", "axis axis--y")
+        .attr("transform", "translate(" + margin.left + ",0)")
+        .call(d3.axisLeft(y));
+    
+    // bar holder
     g = svg.insert("g", "*")
         .attr("fill", "#bbb");
-        
+    
+    // container for each bar
+    // link to the binned data
     bin = g.selectAll("g.bin")
       .data(bins);
       
     // enter new bins  
     group = bin.enter().insert("g")
         .attr("class", "bin");
-        
+    
+    // add a rectangle to represent each bin    
     group.append("rect")
           .attr("x", function(d) { return x(d.x0) + 1; })
           .attr("y", function(d) { return y(d.length); })
           .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
           .attr("height", function(d) { return y(0) - y(d.length); });
-        
+    
+    // add text that appears on hover    
     group.append("text")
           .attr("fill", "black")
           .attr("x", function(d) { return x(d.x0) + 1; })
